@@ -8,10 +8,9 @@ app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024  # 15 MB uploads
 
 # Paste your links between the quotes. A link left empty ("") is hidden.
-SUPPORT_URL = ""   # e.g. your Ko-fi page: https://ko-fi.com/yourname
-FEEDBACK_URL = ""  # e.g. a Google Form for reports and feedback
+SUPPORT_URL = "ko-fi.com/isabellazepeda"   # e.g. your Ko-fi page: https://ko-fi.com/yourname
 
-LINKS = {"support_url": SUPPORT_URL, "feedback_url": FEEDBACK_URL}
+LINKS = {"support_url": SUPPORT_URL}
 
 PAGE = """
 <!doctype html>
