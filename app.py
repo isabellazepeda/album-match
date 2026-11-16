@@ -7,6 +7,12 @@ from matcher import rank
 app = Flask(__name__)
 app.config["MAX_CONTENT_LENGTH"] = 15 * 1024 * 1024  # 15 MB uploads
 
+# Paste your links between the quotes. A link left empty ("") is hidden.
+SUPPORT_URL = ""   # e.g. your Ko-fi page: https://ko-fi.com/yourname
+FEEDBACK_URL = ""  # e.g. a Google Form for reports and feedback
+
+LINKS = {"support_url": SUPPORT_URL, "feedback_url": FEEDBACK_URL}
+
 PAGE = """
 <!doctype html>
 <html lang="en">
@@ -42,6 +48,12 @@ PAGE = """
              text-decoration: none; font-size: 14px; }
   .links a:hover { border-color: #1db954; color: #1db954; }
   .error { color: #ff7b7b; margin-top: 14px; }
+  footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid #2a2a2a;
+           color: #a8a8a8; font-size: 14px; display: flex; gap: 18px;
+           flex-wrap: wrap; }
+  footer a { color: #a8a8a8; }
+  footer a.coffee { color: #1db954; font-weight: 700; }
+  footer p { margin: 0; width: 100%; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -79,6 +91,12 @@ PAGE = """
       </div>
     {% endfor %}
   {% endif %}
+
+  <footer>
+    {% if feedback_url %}<a href="{{ feedback_url }}" target="_blank" rel="noopener">Report a problem or share feedback</a>{% endif %}
+    {% if support_url %}<a class="coffee" href="{{ support_url }}" target="_blank" rel="noopener">&#9749; Buy me a coffee</a>{% endif %}
+    <p>Photos are processed in memory and never saved.</p>
+  </footer>
 </main>
 </body>
 </html>
@@ -88,14 +106,15 @@ PAGE = """
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "GET":
-        return render_template_string(PAGE)
+        return render_template_string(PAGE, **LINKS)
 
     data = request.files["photo"].read()
     try:
         colors, weights = get_palette(io.BytesIO(data))
     except Exception:
         return render_template_string(
-            PAGE, error="Sorry, I couldn't read that image. Try a JPG or PNG.")
+            PAGE, error="Sorry, I couldn't read that image. Try a JPG or PNG.",
+            **LINKS)
 
     results = []
     for _, a in rank(colors, weights, top=5):
@@ -109,7 +128,7 @@ def home():
     preview = base64.b64encode(data).decode()
     return render_template_string(
         PAGE, results=results, preview=preview,
-        swatches=list(zip(colors, weights)))
+        swatches=list(zip(colors, weights)), **LINKS)
 
 
 if __name__ == "__main__":
